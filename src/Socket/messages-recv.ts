@@ -44,6 +44,7 @@ import {
 	MISSING_KEYS_ERROR_TEXT,
 	NACK_REASONS,
 	NO_MESSAGE_FOUND_ERROR_TEXT,
+	ACCOUNT_RESTRICTED_TEXT,
 	toNumber,
 	unixTimestampSeconds,
 	xmppPreKey,
@@ -93,7 +94,8 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		sendReceipt,
 		uploadPreKeys,
 		sendPeerDataOperationMessage,
-		messageRetryManager
+		messageRetryManager,
+		fetchAccountReachoutTimelock
 	} = sock
 
 	/** this mutex ensures that each retryRequest will wait for the previous one to finish */
@@ -1470,13 +1472,20 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		// error in acknowledgement,
 		// device could not display the message
 		if (attrs.error) {
+			if (attrs.error === 463 || String(attrs.error) === '463') {
+				await fetchAccountReachoutTimelock()
+			}
+
 			logger.warn({ attrs }, 'received error in ack')
 			ev.emit('messages.update', [
 				{
 					key,
 					update: {
 						status: WAMessageStatus.ERROR,
-						messageStubParameters: [attrs.error]
+						messageStubParameters: [
+							attrs.error,
+							...(String(attrs.error) === '463' ? [ACCOUNT_RESTRICTED_TEXT] : [])
+						]
 					}
 				}
 			])
