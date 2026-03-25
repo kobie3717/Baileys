@@ -1472,7 +1472,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		// error in acknowledgement,
 		// device could not display the message
 		if (attrs.error) {
-			if (attrs.error === 463 || String(attrs.error) === '463') {
+			if (String(attrs.error) === '463') {
 				await fetchAccountReachoutTimelock()
 			}
 
