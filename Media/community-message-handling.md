@@ -115,6 +115,3 @@ const groups = await sock.groupFetchAllParticipating();
 const userGroups = Object.values(groups).filter(g => !g.isCommunity);
 ```
 
----
-
-*Contributed by the [WhatsAuction](https://whatsauction.co.za) team — WhatsApp-native auction software for South Africa.*
